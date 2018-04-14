@@ -1311,16 +1311,25 @@ void CMMDVMHost::createDisplay()
 
 		if (port == "modem") {
 			ISerialPort* serial = new CModemSerialPort(m_modem);
-			m_display = new CNextion(m_callsign, dmrid, serial, brightness, displayClock, utc, idleBrightness, screenLayout);
+				CNextion *nextion = new CNextion(m_callsign, dmrid, serial, brightness, displayClock, utc, idleBrightness, screenLayout);
+				nextion->setFrequency(m_conf.getRXFrequency());
+				m_display = nextion;
+				
 		} else if (port == "ump") {
 			if (m_ump != NULL)
-				m_display = new CNextion(m_callsign, dmrid, m_ump, brightness, displayClock, utc, idleBrightness, screenLayout);
+				{
+				CNextion *nextion = new CNextion(m_callsign, dmrid, m_ump, brightness, displayClock, utc, idleBrightness, screenLayout);
+				nextion->setFrequency(m_conf.getRXFrequency());
+				m_display = nextion;
+				}
 		} else {
 			SERIAL_SPEED baudrate = SERIAL_9600;
 			if (screenLayout==4U)
 				baudrate = SERIAL_115200;
 			ISerialPort* serial = new CSerialController(port, baudrate);
-			m_display = new CNextion(m_callsign, dmrid, serial, brightness, displayClock, utc, idleBrightness, screenLayout);
+			CNextion *nextion = new CNextion(m_callsign, dmrid, serial, brightness, displayClock, utc, idleBrightness, screenLayout);
+			nextion->setFrequency(m_conf.getRXFrequency());
+			m_display = nextion;
 		}
 	} else if (type == "LCDproc") {
 		std::string address       = m_conf.getLCDprocAddress();

@@ -36,6 +36,8 @@ public:
 
   virtual void close();
 
+  void setFrequency(unsigned int freq);
+  
 protected:
   virtual void setIdleInt();
   virtual void setErrorInt(const char* text);

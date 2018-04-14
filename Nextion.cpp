@@ -38,6 +38,9 @@ const unsigned int P25_BER_COUNT    = 7U;		  // 7 * 180ms = 1260ms
 const unsigned int NXDN_RSSI_COUNT  = 28U;		  // 28 * 40ms = 1120ms
 const unsigned int NXDN_BER_COUNT   = 28U;		  // 28 * 40ms = 1120ms
 
+//ctemes receive freq
+unsigned int m_frequency;
+
 CNextion::CNextion(const std::string& callsign, unsigned int dmrid, ISerialPort* serial, unsigned int brightness, bool displayClock, bool utc, unsigned int idleBrightness, unsigned int screenLayout) :
 CDisplay(),
 m_callsign(callsign),
@@ -276,7 +279,11 @@ void CNextion::writeDMRInt(unsigned int slotNo, const std::string& src, bool gro
 	char text[30U];
 	::sprintf(text, "dim=%u", m_brightness);
 	sendCommand(text);
-
+	
+	unsigned int df = m_frequency/1000;
+	::sprintf(text, "t6.txt=\"%u Mhz\"", df);
+	sendCommand(text);
+	
 	if (slotNo == 1U) {
 		::sprintf(text, "t0.txt=\"1 %s %s\"", type, src.c_str());
 
@@ -712,6 +719,11 @@ void CNextion::clockInt(unsigned int ms)
 		char text[50U];
 		strftime(text, 50, "t2.txt=\"%x %X\"", Time);
 		sendCommand(text);
+		
+		//Ctemes send utc time
+		Time = ::gmtime(&currentTime);
+		strftime(text, 50, "tutc.txt=\"%x %X\"", Time);
+		sendCommand(text);
 
 		m_clockDisplayTimer.start(); // restart the clock display timer
 	}
@@ -744,4 +756,10 @@ void CNextion::sendCommand(const char* command)
 
 	m_serial->write((unsigned char*)command, (unsigned int)::strlen(command));
 	m_serial->write((unsigned char*)"\xFF\xFF\xFF", 3U);
+}
+
+void CNextion::setFrequency(unsigned int freq)
+{
+	m_frequency = freq;
+	
 }
